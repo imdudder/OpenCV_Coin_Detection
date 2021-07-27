@@ -1,36 +1,44 @@
-//--------------------------------------------------------------------------------------------------------------------
+//==============================================================================
 // Coin Detection
 // Authors: Ian Dudder and Karran Singh
 // CSS 487 A, Autumn 2020
-//--------------------------------------------------------------------------------------------------------------------
-// This program seeks to find and identify US coins within a given image. The coins must be pennies, nickels, dimes, or
-// quarters and they must be standard front and back (eg. eagle back quarters and lincoln memorial backed pennies).
+//------------------------------------------------------------------------------
+// This program seeks to find and identify US coins within a given image. The 
+// coins must be pennies, nickels, dimes, or quarters and they must be standard
+// front and back (eg. eagle back quarters and lincoln memorial backed pennies).
 //
 // Project objectives:
 //      1. Recognize elliptical objects in an image.
 //      2. Identify which elliptical objects are coins, and which are not.
 //      3. Determine if the coin is heads-up, or tails-up.
-//      4. Identify which type of coin was found (i.e. penny, nickel, dime, or quarter).
+//      4. Identify which type of coin was found (i.e. penny, nickel, dime, or 
+//         quarter).
 //      5. Report on the total value of the coins in the image.
 //
-// This program will read in all ".jpg" images which are contained in the "Test Images" directory local to the program.
-// Any images you do not wish to run should be put into the "Additional Images" folder in the "Test Images" directory. 
-// After the input images are processed, the corresponding output images will be saved to the "Output Images" directory
-// local to the program and displayed to the screen.
-//--------------------------------------------------------------------------------------------------------------------
+// This program will read in all ".jpg" images which are contained in the "Test 
+// Images" directory local to the program. Any images you do not wish to run 
+// should be put into the "Additional Images" folder in the "Test Images" 
+// directory. After the input images are processed, the corresponding output 
+// images will be saved to the "Output Images" directory local to the program
+// and displayed to the screen.
+//------------------------------------------------------------------------------
 // Project Pre-conditions:
 //   -- Must be compiled using C++ 17 standard in order to use std::filesystem.
 //
-//   -- Must be compiled using x64 in debug mode, OpenCV must be installed and property sheet imported.
+//   -- Must be compiled using x64 in debug mode, OpenCV must be installed and 
+//      property sheet imported.
 //
-//   -- Three directories must exist local to the program. The first directory must be called "Test Images" from where 
-//      the program will read all non-directory files with the extension ".jpg". The Second directory must be called
-//      "Output Images". The third directory must be called "Template Images" where 8 images must exist serving as the
-//      template coins images. In "Template Images" two images for each type of coin (Quarter, Dime, Nickle, Penny) 
-//      must exist with one for heads and the other for tails.
+//   -- Three directories must exist local to the program. The first directory 
+//      must be called "Test Images" from where the program will read all non-
+//      directory files with the extension ".jpg". The Second directory must be 
+//      called "Output Images". The third directory must be called "Template 
+//      Images" where 8 images must exist serving as the template coins images.
+//      In "Template Images" two images for each type of coin (Quarter, Dime, 
+//      Nickle, Penny) must exist with one for heads and the other for tails.
 //
-//   -- Any images you wish to test are in the "Test Images" directory. All ".jpg" files in this directory will be ran.
-//--------------------------------------------------------------------------------------------------------------------
+//   -- Any images you wish to test are in the "Test Images" directory. All 
+//      ".jpg" files in this directory will be ran.
+//==============================================================================
 
 #include <iostream>
 #include <iomanip>
@@ -42,53 +50,74 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 
-/* findNumberOfEdges
- * Precondition: edgeImage must be a single channel, binary image with edges a value of 255 and non-edges as 0.
- * Postcondition: The number of edge pixels are counted and the sum is returned as an int.
+
+/*----------------------------- findNumberOfEdges ------------------------------ 
+ * Precondition:  edgeImage must be a single channel, binary image with edges a 
+ *                value of 255 and non-edges as 0.
+ * Postcondition: The number of edge pixels are counted and the sum is returned
+ *                as an int.
  */
 int findNumberOfEdges(cv::Mat& edgeImage);
 
-/* resizeSourceImage
- * Precondition: None
- * Postcondition: If sourceImg row or col is greater than maxDim, The larger dimension of the sourceImg will be resized
- *                to the maxDim size and the smaller dimension will be scaled proportionally and the resulting image
- *                will be assigned to the outputImg.
+
+/*------------------------------ resizeSourceImage -----------------------------
+ * Precondition:  None
+ * Postcondition: If sourceImg row or col is greater than maxDim, The larger 
+ *                dimension of the sourceImg will be resized to the maxDim size 
+ *                and the smaller dimension will be scaled proportionally and the
+ *                resulting image will be assigned to the outputImg.
  */
 void resizeSourceImage(cv::Mat sourceImg, cv::Mat &outputImg, const unsigned int maxDim);
 
-/* findCoins
- * Precondition: A valid sourceImg is provided which has rows and cols greater than 0. A directory must be called
- *               "Template Images" where 8 images must exist serving as the template images (Two images for each type
- *               of coin (Quarter, Dime, Nickle, Penny) one for heads and one for tails). The 8 images must have the
- *               following names: dimeHeads.jpg, dimeTails.jpg, nickelHeads.jpg, nickelTails.jpg, pennyHeads.jpg,
- *               pennyTails.jpg, quarterHeads.jpg, quarterTails.jpg.
- * Postcondition: All the elliptical objects in the sourceImg will be enclosed in a red ellipse on the outputImg. The
- *                elliptical objects which are deemed to be coins will have a green bounding rectangle drawn on the
- *                outputImg along with text labeling what type of coin it is, whether its heads or tails up, and the
- *                percentage of closest match it was to the matched template. Lastly, the image will include the
- *                estimated value of the coins at the top of the output image.
+
+/*---------------------------------- findCoins ---------------------------------
+ * Precondition:  A valid sourceImg is provided which has rows and cols greater 
+ *                than 0. A directory must be called "Template Images" where 8 
+ *                images must exist serving as the template images (Two images 
+ *                for each type of coin (Quarter, Dime, Nickle, Penny) one for 
+ *                heads and one for tails). The 8 images must have the following
+ *                names: dimeHeads.jpg, dimeTails.jpg, nickelHeads.jpg, 
+ *                nickelTails.jpg, pennyHeads.jpg, pennyTails.jpg, 
+ *                quarterHeads.jpg, quarterTails.jpg.
+ * Postcondition: All the elliptical objects in the sourceImg will be enclosed in
+ *                a red ellipse on the outputImg. The elliptical objects which 
+ *                are deemed to be coins will have a green bounding rectangle 
+ *                drawn on the outputImg along with text labeling what type of 
+ *                coin it is, whether its heads or tails up, and the percentage
+ *                of closest match it was to the matched template. Lastly, the 
+ *                image will include the estimated value of the coins at the top
+ *                of the output image.
  */
 void findCoins(cv::Mat &sourceImg, cv::Mat &outputImg);
 
-// global constants, local directories
+
+// Global constants, local directories
 const std::string inputDirectory{"Test Images/"};
 const std::string outputDirectory{"Output Images/"};
 const std::string templateDirectory{"Template Images/"};
 
-/* main
- * Precondition: Three directories local to the program must exist. The first directory must be called "Test Images"
- *               from where the program will read all the non-directory files with the extension ".jpg". The second
- *               directory must be called "Output Images". The third directory must be called "Template Images" where 8
- *               images must exist serving as the template images. Two images for each type of coin (Quarter, Dime,
- *               Nickle, Penny) one for heads and one for tails.
- * Postcondition: The function will go through every file that is not a directory in the local "Test Images" directory
- *                and read all the ones which have a ".jpg" extension. Then it will call the findCoins function on each
- *                ".jpg" image which was read in. Once this has been done for all the images in the "Test Images"
- *                directory, both the source image and the corresponding processed output image showing the coins will
- *                be displayed to the screen one at a time. After all images are displayed, the outputs image will be
- *                saved to the local "Output Images" directory with the same name as the input image it was generated
- *                from with the text "_output" appended to it before the ".jpg" extension.
- * */
+
+/*------------------------------------ main ------------------------------------
+ * Precondition:  Three directories local to the program must exist. The first 
+ *                directory must be called "Test Images" from where the program 
+ *                will read all the non-directory files with the extension 
+ *                ".jpg". The second directory must be called "Output Images". 
+ *                The third directory must be called "Template Images" where 8
+ *                images must exist serving as the template images. Two images 
+ *                for each type of coin (Quarter, Dime, Nickle, Penny) one for 
+ *                heads and one for tails.
+ * Postcondition: The function will go through every file that is not a directory
+ *                in the local "Test Images" directory and read all the ones 
+ *                which have a ".jpg" extension. Then it will call the findCoins 
+ *                function on each ".jpg" image which was read in. Once this has 
+ *                been done for all the images in the "Test Images" directory, 
+ *                both the source image and the corresponding processed output 
+ *                image showing the coins will be displayed to the screen one at
+ *                a time. After all images are displayed, the outputs image will 
+ *                be saved to the local "Output Images" directory with the same 
+ *                name as the input image it was generated from with the text 
+ *                "_output" appended to it before the ".jpg" extension.
+ */
 int main(int argc, char *argv[]) {
 
     // inputPath to .jpg file or dir containing .jpg file(s)
@@ -187,17 +216,27 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-/* findCoins
- * Precondition: A valid sourceImg is provided which has rows and cols greater than 0. A directory must be called
- *               "Template Images" where 8 images must exist serving as the template images (Two images for each type
- *               of coin (Quarter, Dime, Nickle, Penny) one for heads and one for tails). The 8 images must have the
- *               following names: dimeHeads.jpg, dimeTails.jpg, nickelHeads.jpg, nickelTails.jpg, pennyHeads.jpg,
- *               pennyTails.jpg, quarterHeads.jpg, quarterTails.jpg.
- * Postcondition: All the elliptical objects in the sourceImg will be enclosed in a red ellipse on the outputImg. The
- *                elliptical objects which are deemed to be coins will have a green bounding rectangle drawn on the
- *                outputImg along with text labeling what type of coin it is, whether its heads or tails up, and the
- *                percentage of closest match it was to the matched template. Lastly, the image will include the
- *                estimated value of the coins at the top of the output image.
+
+
+
+
+/*---------------------------------- findCoins ---------------------------------
+ * Precondition:  A valid sourceImg is provided which has rows and cols greater
+ *                than 0. A directory must be called "Template Images" where 8
+ *                images must exist serving as the template images (Two images
+ *                for each type of coin (Quarter, Dime, Nickle, Penny) one for
+ *                heads and one for tails). The 8 images must have the following
+ *                names: dimeHeads.jpg, dimeTails.jpg, nickelHeads.jpg,
+ *                nickelTails.jpg, pennyHeads.jpg, pennyTails.jpg,
+ *                quarterHeads.jpg, quarterTails.jpg.
+ * Postcondition: All the elliptical objects in the sourceImg will be enclosed in
+ *                a red ellipse on the outputImg. The elliptical objects which
+ *                are deemed to be coins will have a green bounding rectangle
+ *                drawn on the outputImg along with text labeling what type of
+ *                coin it is, whether its heads or tails up, and the percentage
+ *                of closest match it was to the matched template. Lastly, the
+ *                image will include the estimated value of the coins at the top
+ *                of the output image.
  */
 void findCoins(cv::Mat &sourceImg, cv::Mat &outputImg) {
 
@@ -235,7 +274,7 @@ void findCoins(cv::Mat &sourceImg, cv::Mat &outputImg) {
 
     int coinTypeCount[numberOfTemplates] = {0};
 
-    /*--------------------------------Step 1: BLUR_&_CANNY----------------------------------*/
+    /*------------------------- Step 1: BLUR_&_CANNY -------------------------*/
 
     //1.1 - crease grayscale image from sourceImg
     cv::Mat sourceImgGray;
@@ -266,7 +305,7 @@ void findCoins(cv::Mat &sourceImg, cv::Mat &outputImg) {
     // create image where contours will be filled solid with color
     cv::Mat contourFilledWithColorImg = sourceImg.clone();
 
-    /*----------------------Step 2: Cycle through each Detected Contour---------------------*/
+    /*------------ Step 2: Cycle through each Detected Contour ---------------*/
     for (int currentContour = 0; currentContour < contours.size(); currentContour++) {
 
         // If contour has less than 5 points or area is less than threshold, skip
@@ -506,4 +545,6 @@ void findCoins(cv::Mat &sourceImg, cv::Mat &outputImg) {
                 cv::Scalar(0, 0, 0), 6);
     cv::putText(outputImg, collectionValue, textOrigin, cv::FONT_HERSHEY_SIMPLEX, 2.0,
                 cv::Scalar(100, 255, 0), 2);
+
+    return;
 }
