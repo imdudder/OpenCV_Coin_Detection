@@ -2,6 +2,8 @@
 
 This program utilizes the OpenCV library to analyze an input image and identify U.S. coins within the image. Once the program has recognized an object as a coin, it will determine if it is a penny, nickel, dime, or quarter, and identify if it is heads-up or tails-up. Based on these identifications, it will print an output image with all the coins boxed-in and labeled with their type, orientation, and a measure of confidence in their identification. Additionally, the output image will include the total value of the collection.
 
+![coins2_output](https://user-images.githubusercontent.com/79345007/130873942-eda48f90-626e-4f67-b0e2-0391f2debdb8.jpg)
+
 Project objectives:
    1) Recognize elliptical objects in an image.
    2) Identify which elliptical objects are coins, and which are not.
